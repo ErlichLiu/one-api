@@ -44,6 +44,9 @@ function renderType(type, t) {
 function renderBalance(type, balance, t) {
   switch (type) {
     case 1: // OpenAI
+        if (balance === 0) {
+            return <span>{t('channel.table.balance_not_supported')}</span>;
+        }
       return <span>${balance.toFixed(2)}</span>;
     case 4: // CloseAI
       return <span>¥{balance.toFixed(2)}</span>;
@@ -57,6 +60,8 @@ function renderBalance(type, balance, t) {
       return <span>¥{balance.toFixed(2)}</span>;
     case 13: // AIGC2D
       return <span>{renderNumber(balance)}</span>;
+    case 20: // OpenRouter
+      return <span>${balance.toFixed(2)}</span>;
     case 36: // DeepSeek
       return <span>¥{balance.toFixed(2)}</span>;
     case 44: // SiliconFlow
@@ -106,7 +111,7 @@ const ChannelsTable = () => {
 
   const loadChannels = async (startIdx) => {
     const res = await API.get(`/api/channel/?p=${startIdx}`);
-    const {success, message, data} = res.data;
+    const { success, message, data } = res.data;
     if (success) {
       let localChannels = data.map(processChannelData);
       if (startIdx === 0) {
@@ -488,7 +493,6 @@ const ChannelsTable = () => {
               onClick={() => {
                 sortChannel('balance');
               }}
-              hidden={!showDetail}
             >
               {t('channel.table.balance')}
             </Table.HeaderCell>
@@ -497,6 +501,7 @@ const ChannelsTable = () => {
               onClick={() => {
                 sortChannel('priority');
               }}
+              hidden={!showDetail}
             >
               {t('channel.table.priority')}
             </Table.HeaderCell>
@@ -536,7 +541,7 @@ const ChannelsTable = () => {
                       basic
                     />
                   </Table.Cell>
-                  <Table.Cell hidden={!showDetail}>
+                  <Table.Cell>
                     <Popup
                       trigger={
                         <span
@@ -552,7 +557,7 @@ const ChannelsTable = () => {
                       basic
                     />
                   </Table.Cell>
-                  <Table.Cell>
+                  <Table.Cell hidden={!showDetail}>
                     <Popup
                       trigger={
                         <Input
@@ -586,7 +591,15 @@ const ChannelsTable = () => {
                     />
                   </Table.Cell>
                   <Table.Cell>
-                    <div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '2px',
+                        rowGap: '6px',
+                      }}
+                    >
                       <Button
                         size={'tiny'}
                         positive
